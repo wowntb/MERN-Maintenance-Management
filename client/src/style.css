@@ -1,8 +1,8 @@
 body {
   font-family: Arial, sans-serif;
   background-color: #f0f8ff;
-  margin: 0;
-  padding: 0;
+  margin: 10px;
+  padding: 10px;
 }
 
 .container {
@@ -30,7 +30,8 @@ select {
 }
 
 button {
-  padding: 10px 20px;
+  margin-right: 10px;
+  padding: 10px;
   background-color: #007bff;
   color: #fff;
   border: none;
