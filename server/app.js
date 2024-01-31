@@ -1,4 +1,5 @@
 const express = require("express");
+const helmet = require("helmet");
 const bodyParser = require("body-parser");
 // Import job routes module.
 const jobRoutes = require("./routes/jobRoutes");
@@ -14,6 +15,9 @@ const app = express();
 
 // Middleware to parse incoming JSON requests.
 app.use(bodyParser.json());
+
+// Middleware to improve security.
+app.use(helmet());
 
 // Use job routes.
 // Mount job routes under the "/api/jobs" path.
