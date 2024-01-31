@@ -1,7 +1,6 @@
-import { useState } from "react";
+import React, { useState } from "react";
 
 function JobsList({ jobs }) {
-  // State for managing the update job form inputs and selected job ID.
   const [updateJob, setUpdateJob] = useState({
     id: "",
     description: "",
@@ -10,17 +9,15 @@ function JobsList({ jobs }) {
     status: "",
   });
   const [updateJobId, setUpdateJobId] = useState(null);
-
-  // State for filtering jobs based on status.
   const [filterStatus, setFilterStatus] = useState(null);
+  const [batchStatus, setBatchStatus] = useState("");
+  const [selectedJobs, setSelectedJobs] = useState([]);
 
-  // Function to handle input changes in the update job form.
   const handleUpdateInputChange = (e, id) => {
     const { name, value } = e.target;
     setUpdateJob({ ...updateJob, id, [name]: value });
   };
 
-  // Function to handle updating a job.
   const handleUpdateJob = async (id) => {
     try {
       const response = await fetch(`/api/jobs/${id}`, {
@@ -33,7 +30,6 @@ function JobsList({ jobs }) {
       if (!response.ok) {
         throw new Error("Failed to update job");
       }
-      // Reset update job state and ID after updating.
       setUpdateJob({
         id: "",
         description: "",
@@ -47,7 +43,6 @@ function JobsList({ jobs }) {
     }
   };
 
-  // Function to toggle the update job form.
   const handleToggleUpdateForm = (id) => {
     setUpdateJobId(updateJobId === id ? null : id);
     if (updateJobId !== id) {
@@ -56,25 +51,53 @@ function JobsList({ jobs }) {
     }
   };
 
-  // Function to filter jobs based on status.
   const handleFilterStatus = (status) => {
     setFilterStatus(status);
   };
 
-  // Function to show all jobs by setting the filterStatus to null.
   const handleShowAll = () => {
     setFilterStatus(null);
   };
 
-  // Filter jobs based on selected status.
-  const filteredJobs = filterStatus // If the state of filterStatus is true/not null then the jobs state is filtered by the filterStatus.
+  const handleBatchUpdate = async () => {
+    try {
+      const response = await fetch("/api/jobs/batch", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ jobs: selectedJobs, status: batchStatus }),
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update jobs in batch");
+      }
+      setBatchStatus("");
+      setSelectedJobs([]);
+    } catch (error) {
+      console.error("Error updating jobs in batch:", error);
+    }
+  };
+
+  const handleCheckboxChange = (e, jobId) => {
+    const isChecked = e.target.checked;
+    if (isChecked) {
+      setSelectedJobs([...selectedJobs, jobId]);
+    } else {
+      setSelectedJobs(
+        selectedJobs.filter((selectedJob) => selectedJob._id !== jobId)
+      );
+    }
+
+    console.log(selectedJobs);
+  };
+
+  const filteredJobs = filterStatus
     ? jobs.filter((job) => job.status === filterStatus)
-    : jobs; // Else filteredJobs will just be assigned the jobs state.
+    : jobs;
 
   return (
     <>
       <h2>Jobs List</h2>
-      {/* Buttons to filter jobs by status. */}
       <div>
         <button onClick={() => handleFilterStatus("Submitted")}>
           Show Submitted
@@ -91,10 +114,27 @@ function JobsList({ jobs }) {
         <button onClick={handleShowAll}>Show All</button>
       </div>
 
-      {/* The list of jobs. */}
+      <div>
+        <select
+          value={batchStatus}
+          onChange={(e) => setBatchStatus(e.target.value)}
+        >
+          <option value="">Select Status for Batch Update</option>
+          <option value="Submitted">Submitted</option>
+          <option value="In progress">In Progress</option>
+          <option value="Completed">Completed</option>
+          <option value="Archived">Archived</option>
+        </select>
+        <button onClick={handleBatchUpdate}>Batch Update</button>
+      </div>
+
       <ul>
         {filteredJobs.map((job) => (
           <li key={job._id}>
+            <input
+              type="checkbox"
+              onChange={(e) => handleCheckboxChange(e, job._id)}
+            />
             <strong>Description:</strong> {job.description}
             <br />
             <strong>Location:</strong> {job.location}
@@ -103,11 +143,9 @@ function JobsList({ jobs }) {
             <br />
             <strong>Status:</strong> {job.status}
             <br />
-            {/* Button to toggle update form. */}
             <button onClick={() => handleToggleUpdateForm(job._id)}>
               Update
             </button>
-            {/* Update form. */}
             {updateJobId === job._id && (
               <div>
                 <input
@@ -124,7 +162,6 @@ function JobsList({ jobs }) {
                   onChange={(e) => handleUpdateInputChange(e, job._id)}
                   placeholder="New Location"
                 />
-                {/* Dropdown menu for selecting priority. */}
                 <select
                   name="priority"
                   value={updateJob.priority}
@@ -134,7 +171,6 @@ function JobsList({ jobs }) {
                   <option value="Medium">Medium</option>
                   <option value="Low">Low</option>
                 </select>
-                {/* Dropdown menu for selecting status. */}
                 <select
                   name="status"
                   value={updateJob.status}
@@ -145,7 +181,6 @@ function JobsList({ jobs }) {
                   <option value="Completed">Completed</option>
                   <option value="Archived">Archived</option>
                 </select>
-                {/* Button to save the updated job. */}
                 <button onClick={() => handleUpdateJob(job._id)}>Save</button>
               </div>
             )}

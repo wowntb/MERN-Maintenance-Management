@@ -7,7 +7,7 @@ const jobSchema = new mongoose.Schema({
   priority: { type: String, required: true },
   status: {
     type: String,
-    default: "submitted",
+    default: "Submitted",
   },
   creation_date: { type: Date, default: Date.now },
 });

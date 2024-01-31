@@ -33,8 +33,14 @@ module.exports = {
 
   batchUpdateStatus: async (req, res) => {
     try {
-      const { jobIds, status } = req.body;
-      await Job.updateMany({ _id: { $in: jobIds } }, { $set: { status } });
+      const { jobs, status } = req.body;
+      console.log(jobs);
+      // Update all jobs in batch with the provided status.
+      await Job.updateMany(
+        { _id: { $in: jobs } },
+        { $set: { status: status } }
+      );
+
       res.json({ message: "Status updated successfully" });
     } catch (err) {
       res.status(500).json({ message: err.message });

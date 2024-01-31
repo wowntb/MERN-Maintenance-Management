@@ -4,7 +4,7 @@ const jobController = require("../controllers/jobController");
 
 router.post("/", jobController.createJob);
 router.get("/", jobController.getJobs);
-router.put("/:id", jobController.updateJob);
 router.put("/batch", jobController.batchUpdateStatus);
+router.put("/:id", jobController.updateJob);
 
 module.exports = router;
