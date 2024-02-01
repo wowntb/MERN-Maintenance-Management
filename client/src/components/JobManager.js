@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import NewJob from "./NewJob"; // Import my NewJob component.
-import JobsList from "./JobsList"; // Import my JobsList component.
+import NewJob from "./NewJob";
+import JobsList from "./JobsList";
+import ArchivedJobs from "./ArchivedJobs";
 
 function JobManager() {
   const [jobs, setJobs] = useState([]); // State to store jobs data.
@@ -36,6 +37,8 @@ function JobManager() {
 
       {/* Component to display list of jobs. The state of jobs is shared with this component.*/}
       <JobsList jobs={jobs} />
+      {/* Component to display the jobs that have been archived. */}
+      <ArchivedJobs />
     </div>
   );
 }

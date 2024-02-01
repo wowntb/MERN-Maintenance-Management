@@ -9,6 +9,7 @@ const jobSchema = new mongoose.Schema({
     type: String,
     default: "Submitted",
   },
+  archived: { type: Boolean, default: false },
   creation_date: { type: Date, default: Date.now },
 });
 

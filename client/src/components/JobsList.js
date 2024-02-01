@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
 function JobsList({ jobs }) {
+  // State variables for managing job updates, filters, and batch updates
   const [updateJob, setUpdateJob] = useState({
     id: "",
     description: "",
@@ -13,11 +14,13 @@ function JobsList({ jobs }) {
   const [batchStatus, setBatchStatus] = useState("");
   const [selectedJobs, setSelectedJobs] = useState([]);
 
+  // Function to handle changes in update input fields
   const handleUpdateInputChange = (e, id) => {
     const { name, value } = e.target;
     setUpdateJob({ ...updateJob, id, [name]: value });
   };
 
+  // Function to handle individual job updates
   const handleUpdateJob = async (id) => {
     try {
       const response = await fetch(`/api/jobs/${id}`, {
@@ -43,22 +46,7 @@ function JobsList({ jobs }) {
     }
   };
 
-  const handleToggleUpdateForm = (id) => {
-    setUpdateJobId(updateJobId === id ? null : id);
-    if (updateJobId !== id) {
-      const jobToUpdate = jobs.find((job) => job._id === id);
-      setUpdateJob({ ...jobToUpdate });
-    }
-  };
-
-  const handleFilterStatus = (status) => {
-    setFilterStatus(status);
-  };
-
-  const handleShowAll = () => {
-    setFilterStatus(null);
-  };
-
+  // Function to handle batch updates
   const handleBatchUpdate = async () => {
     try {
       const response = await fetch("/api/jobs/batch", {
@@ -78,6 +66,44 @@ function JobsList({ jobs }) {
     }
   };
 
+  // Function to handle archiving individual jobs
+  const handleArchiveJob = async (id) => {
+    try {
+      const response = await fetch(`/api/jobs/archive/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(id);
+      if (!response.ok) {
+        throw new Error("Failed to archive job");
+      }
+    } catch (error) {
+      console.error("Error archiving job:", error);
+    }
+  };
+
+  // Function to toggle update form visibility for individual jobs
+  const handleToggleUpdateForm = (id) => {
+    setUpdateJobId(updateJobId === id ? null : id);
+    if (updateJobId !== id) {
+      const jobToUpdate = jobs.find((job) => job._id === id);
+      setUpdateJob({ ...jobToUpdate });
+    }
+  };
+
+  // Function to handle filtering by job status
+  const handleFilterStatus = (status) => {
+    setFilterStatus(status);
+  };
+
+  // Function to show all jobs
+  const handleShowAll = () => {
+    setFilterStatus(null);
+  };
+
+  // Function to handle checkbox changes for batch updates
   const handleCheckboxChange = (e, jobId) => {
     const isChecked = e.target.checked;
     if (isChecked) {
@@ -87,18 +113,18 @@ function JobsList({ jobs }) {
         selectedJobs.filter((selectedJob) => selectedJob._id !== jobId)
       );
     }
-
-    console.log(selectedJobs);
   };
 
-  const filteredJobs = filterStatus
-    ? jobs.filter((job) => job.status === filterStatus)
-    : jobs;
+  // Filter jobs based on the "archived" value being false
+  const filteredJobs = jobs.filter(
+    (job) => !job.archived && (!filterStatus || job.status === filterStatus)
+  );
 
   return (
     <>
       <h2>Jobs List</h2>
       <div>
+        {/* Buttons for filtering job statuses */}
         <button onClick={() => handleFilterStatus("Submitted")}>
           Show Submitted
         </button>
@@ -108,13 +134,11 @@ function JobsList({ jobs }) {
         <button onClick={() => handleFilterStatus("Completed")}>
           Show Completed
         </button>
-        <button onClick={() => handleFilterStatus("Archived")}>
-          Show Archived
-        </button>
         <button onClick={handleShowAll}>Show All</button>
       </div>
 
       <div>
+        {/* Select and button for batch updates */}
         <select
           value={batchStatus}
           onChange={(e) => setBatchStatus(e.target.value)}
@@ -123,14 +147,15 @@ function JobsList({ jobs }) {
           <option value="Submitted">Submitted</option>
           <option value="In progress">In Progress</option>
           <option value="Completed">Completed</option>
-          <option value="Archived">Archived</option>
         </select>
         <button onClick={handleBatchUpdate}>Batch Update</button>
       </div>
 
       <ul>
+        {/* Mapping over filtered jobs */}
         {filteredJobs.map((job) => (
           <li key={job._id}>
+            {/* Checkbox for batch update */}
             <input
               type="checkbox"
               onChange={(e) => handleCheckboxChange(e, job._id)}
@@ -143,9 +168,15 @@ function JobsList({ jobs }) {
             <br />
             <strong>Status:</strong> {job.status}
             <br />
+            {/* Displaying archive status */}
+            <strong>Archive:</strong> {job.archived ? "Yes" : "No"}
+            <br />
+            {/* Buttons for update and archive */}
             <button onClick={() => handleToggleUpdateForm(job._id)}>
               Update
             </button>
+            <button onClick={() => handleArchiveJob(job._id)}>Archive</button>
+            {/* Update form if selected */}
             {updateJobId === job._id && (
               <div>
                 <input
@@ -179,7 +210,6 @@ function JobsList({ jobs }) {
                   <option value="Submitted">Submitted</option>
                   <option value="In progress">In Progress</option>
                   <option value="Completed">Completed</option>
-                  <option value="Archived">Archived</option>
                 </select>
                 <button onClick={() => handleUpdateJob(job._id)}>Save</button>
               </div>

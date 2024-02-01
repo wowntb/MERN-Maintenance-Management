@@ -9,16 +9,14 @@ const { connectToMongoDB } = require("./config/database");
 connectToMongoDB();
 
 // Define the port number for the server to listen on.
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 // Create Express application instance.
 const app = express();
 
-// Middleware to parse incoming JSON requests.
-app.use(bodyParser.json());
-
 // Middleware to improve security.
 app.use(helmet());
-
+// Middleware to parse incoming JSON requests.
+app.use(bodyParser.json());
 // Use job routes.
 // Mount job routes under the "/api/jobs" path.
 app.use("/api/jobs", jobRoutes);

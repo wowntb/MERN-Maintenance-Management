@@ -46,4 +46,40 @@ module.exports = {
       res.status(500).json({ message: err.message });
     }
   },
+
+  archiveJob: async (req, res) => {
+    try {
+      // Find the job by ID and update its "archive" field to true.
+      const job = await Job.findByIdAndUpdate(
+        req.params.id,
+        { $set: { archived: true } },
+        { new: true }
+      );
+
+      if (!job) {
+        // If job is not found, return 404 Not Found.
+        return res.status(404).json({ error: "Job not found" });
+      }
+
+      // If the job is successfully updated, return the updated job.
+      res.json(job);
+    } catch (error) {
+      console.error("Error archiving job:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
+
+  getArchives: async (req, res) => {
+    try {
+      // Find documents with archived: true condition.
+      const archivedJobs = await Job.find({ archived: true });
+
+      // Send the found documents as a response.
+      res.json(archivedJobs);
+    } catch (error) {
+      console.error("Error fetching archived documents:", error);
+      // Send an error response if there's an error.
+      res.status(500).json({ error: "Internal server error" });
+    }
+  },
 };
